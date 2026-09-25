@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar, NavTab } from './components/Sidebar';
 import { Header } from './components/Header';
 import { OverviewView } from './components/OverviewView';
@@ -64,7 +64,7 @@ export default function App() {
   useEffect(() => {
     loadAllData();
 
-    const unsubscribe = apiService.subscribeToStream({
+    const unsubscribe = apiService.subscribeToEventStream({
       onStatusChange: (status) => {
         setConnectionState(status);
       },
@@ -259,3 +259,4 @@ export default function App() {
     </div>
   );
 }
+
