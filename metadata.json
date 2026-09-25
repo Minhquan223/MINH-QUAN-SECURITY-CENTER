@@ -1,0 +1,6 @@
+{
+  "name": "Minh Quan Security Center",
+  "description": "Enterprise-grade SOC cybersecurity monitoring dashboard for Debian Linux server with real-time SSE telemetry, incident investigation, and log analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

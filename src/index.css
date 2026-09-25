@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0c1322;
+  --color-surface-dim: #0c1322;
+  --color-surface-bright: #323949;
+  --color-surface-container-lowest: #070e1d;
+  --color-surface-container-low: #141b2b;
+  --color-surface-container: #191f2f;
+  --color-surface-container-high: #232a3a;
+  --color-surface-container-highest: #2e3545;
+  --color-surface-variant: #2e3545;
+  
+  --color-primary: #89ceff;
+  --color-primary-container: #0ea5e9;
+  --color-on-primary: #00344d;
+  --color-on-primary-container: #003751;
+  --color-primary-fixed: #c9e6ff;
+  --color-primary-fixed-dim: #89ceff;
+  
+  --color-secondary: #7bd0ff;
+  --color-secondary-container: #00a6e0;
+  --color-on-secondary: #00354a;
+  --color-on-secondary-container: #00374d;
+  --color-secondary-fixed: #c4e7ff;
+  --color-secondary-fixed-dim: #7bd0ff;
+  
+  --color-tertiary: #93ccff;
+  --color-tertiary-container: #40a2e7;
+  --color-on-tertiary: #003351;
+  
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+  
+  --color-outline: #88929b;
+  --color-outline-variant: #3e4850;
+  --color-on-surface: #dce2f7;
+  --color-on-surface-variant: #bec8d2;
+  
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.75rem;
+  --spacing-space-lg: 1rem;
+  --spacing-space-xl: 1.5rem;
+  --spacing-space-2xl: 2rem;
+  --spacing-gutter: 1rem;
+  --spacing-gutter-sm: 0.5rem;
+  --spacing-margin: 1.25rem;
+}
+
+@layer utilities {
+  .font-code-metric-xl {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.75rem;
+    line-height: 2rem;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .text-code-metric-xl {
+    font-size: 1.75rem;
+    line-height: 2rem;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .font-code-metric-lg {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+  }
+  .text-code-metric-lg {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+  }
+  .font-code-body {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    letter-spacing: 0;
+  }
+  .text-code-body {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    letter-spacing: 0;
+  }
+  .font-code-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .text-code-label {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .font-label-caps {
+    font-family: "Inter", sans-serif;
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .text-label-caps {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .font-headline-sm {
+    font-family: "Inter", sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  .text-headline-sm {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  .font-headline-lg {
+    font-family: "Inter", sans-serif;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    letter-spacing: -0.02em;
+  }
+  .text-headline-lg {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    letter-spacing: -0.02em;
+  }
+  .font-headline-xl {
+    font-family: "Inter", sans-serif;
+    font-size: 2rem;
+    line-height: 2.5rem;
+    letter-spacing: -0.025em;
+  }
+  .text-headline-xl {
+    font-size: 2rem;
+    line-height: 2.5rem;
+    letter-spacing: -0.025em;
+  }
+  .font-body-md {
+    font-family: "Inter", sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .text-body-md {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .font-body-sm {
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  .text-body-sm {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
+
+/* Custom scrollbars for high-density terminal log and inspector */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #070e1d;
+}
+::-webkit-scrollbar-thumb {
+  background: #232a3a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #323949;
+}
