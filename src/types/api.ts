@@ -2,88 +2,174 @@ export type ConnectionState = 'LIVE' | 'RECONNECTING' | 'OFFLINE';
 
 export interface SystemMetrics {
   hostname: string;
-  uptime: string;
+  uptime: number;
   baseArch: string;
   kernel: string;
   zfsPoolStatus: string;
   nftablesStatus: string;
   lastSync: string;
-  heartbeatAgeSeconds: number;
+  heartbeatAgeSeconds: number | null;
+
   cpu: {
     loadPercent: number;
     model: string;
-    packageTemp: number;
+    packageTemp: number | null;
     cores: number;
   };
+
   ram: {
     usedGb: number;
     totalGb: number;
     usedPercent: number;
   };
+
   storage: {
-    nvmeUsedTb: number;
-    nvmeTotalTb: number;
-    nvmePercent: number;
-    nvmeTemp: number;
+    root: {
+      mount: string;
+      usedGb: number;
+      totalGb: number;
+      percent: number;
+      filesystem: string;
+      status: string;
+    };
+    data: {
+      mount: string;
+      usedGb: number;
+      totalGb: number;
+      percent: number;
+      filesystem: string;
+      status: string;
+    };
+    smart: string | null;
+    temperature: number | null;
+
+    nvmeUsedTb: number | null;
+    nvmeTotalTb: number | null;
+    nvmePercent: number | null;
+    nvmeTemp: number | null;
     nvmeStatus: string;
-    zfsUsedTb: number;
-    zfsTotalTb: number;
-    zfsPercent: number;
+    zfsUsedTb: number | null;
+    zfsTotalTb: number | null;
+    zfsPercent: number | null;
   };
+
   loadAvg: [number, number, number];
+
   securityTelemetry: {
     defcon: string;
-    blockedTodayDrops: number;
+    blockedTodayDrops: number | null;
     threatPosture: string;
-    fail2banJailsActive: number;
+    fail2banJailsActive: number | null;
     fail2banFailedAttempts: number;
-    crowdsecDecisionsBounces: number;
-    analyzedEvents24h: number;
+    crowdsecDecisionsBounces: number | null;
+    analyzedEvents24h: number | null;
   };
+
   daemonState: {
     dockerVersion: string;
     containersRunning: number;
     containersTotal: number;
     systemdDegradedUnits: number;
-    notice: string;
+    notice: string | null;
     runtimeState: string;
   };
 }
 
 export interface NetworkInterface {
   name: string;
-  type: string;
+  type: 'ethernet' | 'wifi' | 'tailscale';
   tag: string;
-  state: 'UP' | 'STANDBY' | 'ACTIVE';
-  speedDesc: string;
-  ip: string;
-  gatewayOrSsid: string;
-  rxBytes: string;
-  txBytes: string;
-  ping: string;
+  state: string;
+  speedDesc: string | null;
+  duplex: string | null;
+  carrier: boolean;
+  mac: string | null;
+  mtu: number | null;
+  ip: string | null;
+  gateway: string | null;
+
+  ssid: string | null;
+  bssid: string | null;
+  signalDbm: number | null;
+  frequencyMhz: number | null;
+  txBitrateMbps: number | null;
+  rxBitrateMbps: number | null;
+
+  rxBytes: number;
+  txBytes: number;
+  ping: number | null;
   pingType: string;
   icon: string;
 }
 
+export interface WifiInfo {
+  interface: string;
+  state: string;
+  ip: string | null;
+  gateway: string | null;
+  ssid: string | null;
+  bssid: string | null;
+  signalDbm: number | null;
+  frequencyMhz: number | null;
+  txBitrateMbps: number | null;
+  rxBitrateMbps: number | null;
+  mac: string | null;
+  mtu: number | null;
+  carrier: boolean;
+}
+
+export interface LanInfo {
+  interface: string;
+  state: string;
+  ip: string | null;
+  gateway: string | null;
+  speed: string | null;
+  duplex: string | null;
+  carrier: boolean;
+  mac: string | null;
+  mtu: number | null;
+  rxBytes: number;
+  txBytes: number;
+  ping: number | null;
+}
+
 export interface NetworkData {
   primaryDevice: string;
-  wanFiber: boolean;
+  wanFiber: boolean | null;
+
   ingressRxMbps: number;
   egressTxMbps: number;
-  ingressPeakMbps: number;
-  egressPeakMbps: number;
-  activeSockets: {
-    established: number;
-    timeWait: number;
+
+  peaks: {
+    ingressRxMbps: number;
+    egressTxMbps: number;
   };
-  defaultRoute: { device: string; gateway: string };
-  wanPeak24h: { rxMbps: number; txMbps: number };
-  pingRtt: string;
+
+  activeSockets: number;
+
+  defaultRoute: {
+    device: string;
+    gateway: string;
+  };
+
+  wanPeak24h: {
+    rxMbps: number;
+    txMbps: number;
+    scope?: string;
+    sampleCount?: number;
+  };
+
+  pingRtt: number | null;
+
   interfaces: NetworkInterface[];
+
+  wifi: WifiInfo | null;
+  lan: LanInfo[];
+
   trafficPoints: {
-    time: string;
-    rx: number;
-    tx: number;
+    timestamp: number;
+    rxMbps: number;
+    txMbps: number;
   }[];
 }
 
