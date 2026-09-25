@@ -1,22 +1,17 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar, NavTab } from './components/Sidebar';
 import { Header } from './components/Header';
 import { OverviewView } from './components/OverviewView';
+import { NetworkView } from './components/NetworkView';
 import { SecurityEventsView } from './components/SecurityEventsView';
+import { ServicesView } from './components/ServicesView';
 import { LogsView } from './components/LogsView';
 import { ForensicsView } from './components/ForensicsView';
-import { NetworkView } from './components/NetworkView';
-import { ServicesView } from './components/ServicesView';
 import { SettingsView } from './components/SettingsView';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { AlertsDrawer } from './components/AlertsDrawer';
 import { apiService } from './services/api';
-import {
+import type {
   SystemMetrics,
   NetworkData,
   ServiceDaemon,
@@ -24,23 +19,26 @@ import {
   LogEntry,
   ConnectionState,
 } from './types/api';
-import * as mockProvider from './services/mockProvider';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('overview');
-  const [connectionState, setConnectionState] = useState<ConnectionState>('LIVE');
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>(mockProvider.mockSystemMetrics);
-  const [networkData, setNetworkData] = useState<NetworkData>(mockProvider.mockNetworkData);
-  const [services, setServices] = useState<ServiceDaemon[]>(mockProvider.mockServices);
-  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>(
-    mockProvider.mockSecurityEvents,
-  );
-  const [logs, setLogs] = useState<LogEntry[]>(mockProvider.mockLogs);
+  const [connectionState, setConnectionState] =
+    useState<ConnectionState>('RECONNECTING');
+
+  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
+  const [networkData, setNetworkData] = useState<NetworkData | null>(null);
+  const [services, setServices] = useState<ServiceDaemon[]>([]);
+  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Fetch initial data
   const loadAllData = useCallback(async () => {
+    setConnectionState('RECONNECTING');
+    setLoadError(null);
+
     try {
       const [sys, net, svcs, events, logItems] = await Promise.all([
         apiService.getSystemMetrics(),
@@ -55,36 +53,53 @@ export default function App() {
       setServices(svcs);
       setSecurityEvents(events);
       setLogs(logItems);
+      setConnectionState('LIVE');
     } catch (err) {
-      console.warn('[App] Error loading initial metrics', err);
+      console.error('[App] Error loading real API data:', err);
+      setConnectionState('OFFLINE');
+      setLoadError('Unable to connect to the Security Center API.');
     }
   }, []);
 
   useEffect(() => {
     loadAllData();
-  }, [loadAllData]);
 
-  // Subscribe to Realtime SSE Event Stream
-  useEffect(() => {
-    const unsubscribe = apiService.subscribeToEventStream({
+    const unsubscribe = apiService.subscribeToStream({
       onStatusChange: (status) => {
         setConnectionState(status);
       },
+
       onMetrics: (metricsDelta) => {
         setSystemMetrics((prev) => {
+          if (!prev) return prev;
+
           const updated = { ...prev };
+
           if (metricsDelta.cpu) {
-            updated.cpu = { ...prev.cpu, ...metricsDelta.cpu };
+            updated.cpu = { ...updated.cpu, ...metricsDelta.cpu };
           }
+
           if (metricsDelta.ram) {
-            updated.ram = { ...prev.ram, ...metricsDelta.ram };
+            updated.ram = { ...updated.ram, ...metricsDelta.ram };
           }
+
+          if (metricsDelta.loadAvg) {
+            updated.loadAvg = metricsDelta.loadAvg;
+          }
+
+          if (metricsDelta.timestamp) {
+            updated.lastSync = metricsDelta.timestamp;
+            updated.heartbeatAgeSeconds = 0;
+          }
+
           return updated;
         });
       },
+
       onEvent: (streamEvt) => {
         if (streamEvt.type === 'security_event' && streamEvt.data) {
           const newEvent = streamEvt.data as SecurityEvent;
+
           setSecurityEvents((prev) => {
             if (prev.some((e) => e.id === newEvent.id)) return prev;
             return [newEvent, ...prev];
@@ -93,30 +108,75 @@ export default function App() {
       },
     });
 
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    return unsubscribe;
+  }, [loadAllData]);
 
-  // Keyboard shortcut for search
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsSearchOpen((prev) => !prev);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setIsSearchOpen(true);
+      }
+
+      if (event.key === 'Escape') {
+        setIsSearchOpen(false);
+        setIsAlertsOpen(false);
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const unreadAlertsCount = securityEvents.filter(
-    (e) => e.severity === 'CRITICAL' || e.severity === 'WARNING',
+    (event) =>
+      event.severity === 'CRITICAL' || event.severity === 'WARNING',
   ).length;
 
+  /*
+   * Never render mock telemetry.
+   * Until the real API responds, show a simple loading/offline state.
+   */
+  if (!systemMetrics || !networkData) {
+    return (
+      <div className="min-h-screen bg-surface text-white flex items-center justify-center">
+        <div className="text-center px-6">
+          <div className="text-sm uppercase tracking-[0.2em] text-cyan-400 mb-3">
+            MINH QUAN SECURITY CENTER
+          </div>
+
+          {connectionState === 'OFFLINE' ? (
+            <>
+              <div className="text-xl font-semibold mb-2">
+                Security API Offline
+              </div>
+              <div className="text-sm text-slate-400 mb-5">
+                {loadError || 'Unable to load real server telemetry.'}
+              </div>
+              <button
+                onClick={loadAllData}
+                className="px-4 py-2 rounded border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 transition"
+              >
+                Reconnect
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="text-xl font-semibold mb-2">
+                Connecting to homesv...
+              </div>
+              <div className="text-sm text-slate-400">
+                Loading live security telemetry
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen">
-      {/* Sidebar Navigation */}
+    <div className="min-h-screen bg-surface text-white">
       <Sidebar
         activeTab={activeTab}
         onTabChange={(tab) => {
@@ -128,9 +188,7 @@ export default function App() {
         heartbeatAge={systemMetrics.heartbeatAgeSeconds}
       />
 
-      {/* Main View Area Offset by Sidebar (72 = 18rem = 288px) */}
       <div className="pl-72">
-        {/* Top Header */}
         <Header
           activeTab={activeTab}
           connectionState={connectionState}
@@ -138,10 +196,9 @@ export default function App() {
           onOpenAlerts={() => setIsAlertsOpen(true)}
           loadAvg={systemMetrics.loadAvg}
           unreadAlertsCount={unreadAlertsCount}
-          onReconnect={() => loadAllData()}
+          onReconnect={loadAllData}
         />
 
-        {/* View Content */}
         <main className="relative pt-16 bg-surface min-h-screen w-full px-gutter py-space-lg">
           {activeTab === 'overview' && (
             <OverviewView
@@ -153,17 +210,21 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'network' && <NetworkView network={networkData} />}
+          {activeTab === 'network' && (
+            <NetworkView network={networkData} />
+          )}
 
           {activeTab === 'security-events' && (
             <SecurityEventsView
               events={securityEvents}
               onNavigateTab={(t) => setActiveTab(t)}
-              onRefreshFeed={() => loadAllData()}
+              onRefreshFeed={loadAllData}
             />
           )}
 
-          {activeTab === 'services' && <ServicesView services={services} />}
+          {activeTab === 'services' && (
+            <ServicesView services={services} />
+          )}
 
           {activeTab === 'logs' && <LogsView logs={logs} />}
 
@@ -172,13 +233,12 @@ export default function App() {
           {activeTab === 'settings' && (
             <SettingsView
               connectionState={connectionState}
-              onRefreshAll={() => loadAllData()}
+              onRefreshAll={loadAllData}
             />
           )}
         </main>
       </div>
 
-      {/* Global Search Dialog Modal (Ctrl+K) */}
       <GlobalSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -187,14 +247,13 @@ export default function App() {
         onNavigateTab={(t) => setActiveTab(t)}
       />
 
-      {/* Alerts Drawer */}
       <AlertsDrawer
         isOpen={isAlertsOpen}
         onClose={() => setIsAlertsOpen(false)}
         events={securityEvents}
-        onNavigateTab={(t) => setActiveTab(t)}
-        onClearAlerts={() => {
-          // optional clear
+        onNavigateTab={(t) => {
+          setIsAlertsOpen(false);
+          setActiveTab(t);
         }}
       />
     </div>

@@ -5,15 +5,15 @@ export interface SystemMetrics {
   uptime: string;
   baseArch: string;
   kernel: string;
-  zfsPoolStatus: 'HEALTHY' | 'DEGRADED' | 'FAULTED';
-  nftablesStatus: 'ENFORCING' | 'PERMISSIVE' | 'DISABLED';
+  zfsPoolStatus: string;
+  nftablesStatus: string;
   lastSync: string;
   heartbeatAgeSeconds: number;
   cpu: {
     loadPercent: number;
     model: string;
     packageTemp: number;
-    cores: string;
+    cores: number;
   };
   ram: {
     usedGb: number;
@@ -32,7 +32,7 @@ export interface SystemMetrics {
   };
   loadAvg: [number, number, number];
   securityTelemetry: {
-    defcon: number;
+    defcon: string;
     blockedTodayDrops: number;
     threatPosture: string;
     fail2banJailsActive: number;

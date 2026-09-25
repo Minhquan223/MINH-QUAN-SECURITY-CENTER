@@ -82,8 +82,8 @@ class ApiService {
       const data = await response.json();
       return data as T;
     } catch (err) {
-      console.warn(`[ApiService] Request to ${endpoint} failed, falling back to cached/mock data.`, err);
-      return fallbackMockData;
+      console.error(`[ApiService] Request to ${endpoint} failed.`, err);
+      throw err;
     }
   }
 
