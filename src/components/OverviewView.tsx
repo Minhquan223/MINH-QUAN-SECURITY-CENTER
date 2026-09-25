@@ -260,7 +260,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               Analyzed Events (24h)
             </span>
             <span className="font-code-label text-code-label text-on-surface font-bold font-mono">
-              {metrics.securityTelemetry.analyzedEvents24h.toLocaleString()} SEC_LOGS
+              {metrics.securityTelemetry.analyzedEvents24h != null ? metrics.securityTelemetry.analyzedEvents24h.toLocaleString() : 'N/A'} SEC_LOGS
             </span>
           </div>
         </div>
