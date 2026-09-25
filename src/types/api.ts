@@ -76,7 +76,7 @@ export interface NetworkData {
     established: number;
     timeWait: number;
   };
-  defaultRoute: string;
+  defaultRoute: { device: string; gateway: string };
   wanPeak24h: string;
   pingRtt: string;
   interfaces: NetworkInterface[];

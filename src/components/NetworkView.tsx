@@ -40,7 +40,7 @@ export const NetworkView: React.FC<NetworkViewProps> = ({ network }) => {
         <div className="flex items-center gap-space-xs font-mono">
           <div className="bg-surface-container px-space-sm py-1 rounded text-on-surface font-code-label text-code-label">
             <span className="text-outline">DEFAULT ROUTE: </span>
-            <span className="text-secondary font-bold">{network.defaultRoute}</span>
+            <span className="text-secondary font-bold">{network.defaultRoute.device} · {network.defaultRoute.gateway}</span>
           </div>
           <div className="bg-surface-container px-space-sm py-1 rounded text-on-surface font-code-label text-code-label">
             <span className="text-outline">PHY PING: </span>

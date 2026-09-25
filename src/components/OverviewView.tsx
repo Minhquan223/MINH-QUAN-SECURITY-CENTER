@@ -194,7 +194,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">Default Route</span>
-                <span className="text-secondary font-medium font-mono">{network.defaultRoute}</span>
+                <span className="text-secondary font-medium font-mono">{network.defaultRoute.device} · {network.defaultRoute.gateway}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-on-surface-variant">Primary Device</span>
