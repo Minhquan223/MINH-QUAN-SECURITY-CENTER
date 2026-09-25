@@ -205,7 +205,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <div className="flex items-center justify-between mt-space-md pt-space-xs bg-surface-container px-space-sm py-space-xs rounded">
             <span className="font-code-label text-code-label text-outline uppercase">WAN Peak 24h</span>
             <span className="font-code-label text-code-label text-primary font-mono">
-              {network.wanPeak24h}
+              {network.wanPeak24h.rxMbps} RX / {network.wanPeak24h.txMbps} TX Mbps
             </span>
           </div>
         </div>
